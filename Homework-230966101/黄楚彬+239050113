@@ -1,0 +1,58 @@
+import os
+from openai import OpenAI
+
+client = OpenAI(
+  api_key="sk-114514",
+  base_url="https://api.deepseek.com"
+)
+deployment = "deepseek-chat"
+
+class APIError(Exception):
+    """Custom exception for API errors."""
+    pass
+
+def read_text_from_file(file_path):
+    """从指定文件路径读取文本内容。"""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            text = file.read()
+        return text
+    except FileNotFoundError:
+        print(f"文件 {file_path} 不存在。")
+        return None
+    except Exception as e:
+        print(f"读取文件 {file_path} 时发生错误: {e}")
+        return None
+
+def get_summary(text):
+    prompt = f"Summarize the following text in 3-5 sentences:\n\n{text}"
+    messages = [{"role": "user", "content": prompt}]
+    
+    try:
+        response = client.chat.completions.create(
+            model=deployment,
+            messages=messages,
+            temperature=0.7,
+            max_tokens=150
+        )
+    except Exception as e:
+        raise APIError(f"API调用失败: {str(e)}")
+    
+    return response.choices[0].message.content
+
+def summarize_multiple_texts(file_paths):
+    summaries = []
+    for file_path in file_paths:
+        text = read_text_from_file(file_path)
+        if text:
+            summary = get_summary(text)
+            if summary:
+                summaries.append("文件路径："+file_path+" 的摘要是："+summary)
+    return summaries
+
+file_paths = ["Homework-230966101/1.txt","Homework-230966101/123.txt"]
+summaries = summarize_multiple_texts(file_paths)
+
+for summary in summaries:
+    print(f" {summary}\n")
+
