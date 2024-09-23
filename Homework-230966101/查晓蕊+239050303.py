@@ -3,7 +3,7 @@ import os
 from openai import OpenAI
 
 client = OpenAI(
-  api_key="sk-a69cdd0ef556439ea56ec45af734994d", # 提交时删除你的key，避免泄露
+  api_key="", # 提交时删除你的key，避免泄露
   base_url="https://api.deepseek.com"
 )
 deployment = "deepseek-chat"
