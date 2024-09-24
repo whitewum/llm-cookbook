@@ -1,0 +1,61 @@
+import os
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="your-api-key",
+    base_url="https://api.deepseek.com"
+)
+deployment = "deepseek-chat"
+
+def get_summary(text):
+    prompt = f"Summarize the following text in 3-5 sentences:\n\n{text}"
+    messages = [{"role": "user", "content": prompt}]
+    response = client.chat.completions.create(
+        model=deployment,
+        messages=messages,
+        temperature=0.7,
+        max_tokens=150
+    )
+    return response.choices[0].message.content
+
+# Test the function
+sample_text = """
+在2023年，人工智能技术取得了显著的进步。深度学习模型在图像识别、自然语言处理等领域表现出色。同时，量子计算的发展也为未来的技术突破提供了新的可能性。全球各国都在加大对人工智能的投资，以期在未来的科技竞争中占据优势。
+"""
+
+summary = get_summary(sample_text)
+print("Summary:", summary)
+
+# TODO: Implement a function to read text from a file
+def read_text_from_file(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        return file.read()
+
+# TODO: Implement error handling for API calls
+def get_summary_with_error_handling(text):
+    try:
+        return get_summary(text)
+    except Exception as e:
+        return f"Error occurred: {e}"
+
+# TODO: Add functionality to summarize multiple texts
+def summarize_multiple_texts(texts):
+    summaries = []
+    for text in texts:
+        summary = get_summary_with_error_handling(text)
+        summaries.append(summary)
+    return summaries
+
+# Example usage
+file_path = "sample_text.txt"
+text_from_file = read_text_from_file(file_path)
+summary_from_file = get_summary_with_error_handling(text_from_file)
+print("Summary from file:", summary_from_file)
+
+multiple_texts = [
+    "人工智能在医疗领域的应用越来越广泛，特别是在疾病诊断和治疗方案制定方面。",
+    "量子计算的发展为解决复杂问题提供了新的工具，尤其是在密码学和材料科学领域。"
+]
+multiple_summaries = summarize_multiple_texts(multiple_texts)
+for i, summary in enumerate(multiple_summaries):
+    print(f"Summary {i+1}:", summary)
