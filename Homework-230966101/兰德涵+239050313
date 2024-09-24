@@ -1,0 +1,58 @@
+# 兰德涵 + 239050313
+import os
+from openai import OpenAI
+
+client = OpenAI(
+
+  base_url="https://api.deepseek.com"
+)
+deployment = "deepseek-chat"
+
+# def get_summary(text):
+#     prompt = f"Summarize the following text in 3-5 sentences:\n\n{text}"
+#     messages = [{"role": "user", "content": prompt}]
+#     response = client.chat.completions.create(
+#         model=deployment,
+#         messages=messages,
+#         temperature=0.7,
+#         max_tokens=150
+#     )
+#     return response.choices[0].message.content
+
+# Test the function
+sample_text = """
+[give me some python code to Add functionality to summarize multiple texts]
+"""
+
+summary = get_summary(sample_text)
+print("Summary:", summary)
+
+# TODO: 实现一个从文件读取文本的函数
+def read_text_from_file(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return file.read()
+    except FileNotFoundError:
+        print(f"错误：文件 '{file_path}' 不存在。")
+    except IOError:
+        print(f"错误：无法读取文件 '{file_path}'。")
+    return None
+
+# TODO: Implement error handling for API calls
+def fetch_and_summarize(url, texts):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        summaries = summarize_texts(data)
+        return summaries
+    except requests.exceptions.RequestException as e:
+        print(f"Network error: {e}")
+        return None
+# TODO: Add functionality to summarize multiple texts
+from transformers import pipeline
+
+def summarize_texts(texts):
+    summarizer = pipeline("summarization")
+    summaries = [summarizer(text, max_length=50, min_length=10, do_sample=None) for text in texts]
+    return [summary[0]['summary_text'] for summary in summaries]
