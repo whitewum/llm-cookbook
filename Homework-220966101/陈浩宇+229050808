@@ -1,0 +1,70 @@
+import os
+from openai import OpenAI
+
+client = OpenAI(
+  api_key="your-api-key", # 提交时删除你的key，避免泄露
+  base_url="https://api.deepseek.com"
+)
+deployment = "deepseek-chat"
+
+
+def get_summary(text):
+    prompt = f"Summarize the following text in 3-5 sentences:\n\n{text}"
+    messages = [{"role": "user", "content": prompt}]
+    response = client.chat.completions.create(
+        model=deployment,
+        messages=messages,
+        temperature=0.7,
+        max_tokens=150
+    )
+    return response.choices[0].message.content
+  except Exception as e:
+        return f"Error generating summary: {e}"
+# 从文件中读取文本
+def read_text_from_file(file_path):
+    try:
+        with open(file_path, 'r') as file:
+            return file.read()
+    except Exception as e:
+        return f"An error occurred while reading the file: {e}"
+
+# 测试函数
+def test_single_file(file_path):
+    sample_text = read_text_from_file(file_path)
+    if sample_text:
+        summary = get_summary(sample_text)
+        print("Summary:", summary)
+    else:
+        print("No text to summarize.")
+
+def summarize_multiple_texts(file_paths):
+    summaries = {}
+    for file_path in file_paths:
+        text = read_text_from_file(file_path)
+        if text:
+            summaries[file_path] = get_summary(text)
+        else:
+            summaries[file_path] = "Failed to read text or generate summary."
+    return summaries
+
+file_paths = [
+    "path/to/textfile1.txt",
+    "path/to/textfile2.txt",
+]
+
+multiple_summaries = summarize_multiple_texts(file_paths)
+for file_path, summary in multiple_summaries.items():
+    print(f"Summary for {file_path}:\n{summary}\n")
+
+if __name__ == "__main__":
+    # 测试单个文件
+    test_single_file("path/to/your/textfile.txt")
+
+    # 测试多个文件
+    file_paths = [
+        "path/to/textfile1.txt",
+        "path/to/textfile2.txt",
+    ]
+    multiple_summaries = summarize_multiple_texts(file_paths)
+    for file_path, summary in multiple_summaries.items():
+        print(f"Summary for {file_path}:\n{summary}\n")
