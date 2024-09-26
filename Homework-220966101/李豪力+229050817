@@ -1,0 +1,76 @@
+import os  
+from openai import OpenAI
+  
+
+client = OpenAI(  
+    api_key="your-api-key",  
+    base_url="https://api.deepseek.com"  
+)  
+  
+deployment = "deepseek-chat"  
+  
+def get_summary(text):  
+    prompt = f"Summarize the following text in 3-5 sentences:\n\n{text}"  
+    messages = [{"role": "user", "content": prompt}]  
+    try:  
+        response = client.chat.completions.create(  
+            model=deployment,  
+            messages=messages,  
+            temperature=0.7,  
+            max_tokens=150  
+        )  
+        return response.choices[0].message.content  
+    except OpenAIError as e:  
+        print(f"Error from OpenAI API: {e}")  
+        return None  
+
+def read_text_from_file(file_path):
+    try:
+        with open(file_path, 'r') as file:
+            return file.read()
+    except FileNotFoundError:
+        print(f"错误：文件 {file_path} 未找到。")
+        return None
+    except Exception as e:
+        print(f"读取文件时发生错误：{e}")
+        return None
+
+def call_api(api_url, data):
+    try:
+        response = requests.post(api_url, json=data)
+        response.raise_for_status()  # 如果响应包含成功状态码以外的状态码，将引发HTTPError。
+        return response.json()
+    except requests.exceptions.HTTPError as errh:
+        print(f"HTTP错误：{errh}")
+    except requests.exceptions.ConnectionError as errc:
+        print(f"连接错误：{errc}")
+    except requests.exceptions.Timeout as errt:
+        print(f"连接超时：{errt}")
+    except requests.exceptions.RequestException as err:
+        print(f"请求错误：{err}")
+
+def summarize_texts(texts):
+    # 这里只是一个简单的示例，实际的汇总功能可能需要更复杂的逻辑。
+    return "\n".join(texts)
+
+# 用法示例：
+# 假设我们有多个文本文件路径列表
+file_paths = ["text1.txt", "text2.txt", "text3.txt"]
+texts = []
+
+# 从文件中读取文本
+for path in file_paths:
+    text = read_text_from_file(path)
+    if text is not None:
+        texts.append(text)
+
+# 汇总文本
+summary = summarize_texts(texts)
+print("汇总的文本：", summary)
+
+# API调用示例
+api_url = "https://api.example.com/data"
+data = {"key": "value"}  # 这里是要发送到API的数据
+api_response = call_api(api_url, data)
+if api_response:
+    print("API调用成功，返回的数据：", api_response)
