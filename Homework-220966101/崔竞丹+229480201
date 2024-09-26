@@ -1,0 +1,75 @@
+import os
+from openai import OpenAI
+
+# 初始化 OpenAI 客户
+client = OpenAI(api_key="", base_url="https://api.deepseek.com")
+deployment = "deepseek-chat"
+
+# 示例文本直接写入文件
+sample_texts = [
+    """这是第一段文本。人工智能正在改变我们的生活方式。我们可以看到它在各个行业的应用，从医疗保健到金融服务。
+    AI 的发展带来了机遇，也提出了新的挑战。""",
+    
+    """这是第二段文本。量子计算技术正在快速发展。随着科学家们在量子位和算法方面的研究取得进展，
+    我们有可能在不久的将来解决许多传统计算无法解决的问题。""",
+    
+    """这是第三段文本。气候变化是我们这个时代最紧迫的挑战之一。减少温室气体排放以及开发清洁能源是至关重要的。
+    各国需要合作共同应对这一全球性问题。"""
+]
+
+# 将示例文本写入文件
+def write_sample_texts_to_file(file_names, texts):
+    for file_name, text in zip(file_names, texts):
+        with open(file_name, 'w', encoding='utf-8') as file:
+            file.write(text)
+
+def read_text_from_file(file_path):
+    """从指定文件中读取文本内容"""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return file.read()
+    except Exception as e:
+        print(f"读取文件时出错: {e}")
+        return None
+
+def get_summary(text):
+    """获取文本的总结"""
+    prompt = f"Summarize the following text in 3-5 sentences:\n\n{text}"
+    messages = [{"role": "user", "content": prompt}]
+    try:
+        response = client.chat.completions.create(
+            model=deployment,
+            messages=messages,
+            temperature=0.7,
+            max_tokens=150
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        print(f"API 调用失败: {e}")
+        return None
+
+def summarize_multiple_texts(file_names):
+    """汇总多个文件文本的函数"""
+    summaries = {}
+    for file_name in file_names:
+        text = read_text_from_file(file_name)
+        if text:
+            summary = get_summary(text)
+            summaries[file_name] = summary
+    return summaries
+
+# 测试函数
+if __name__ == "__main__":
+    # 定义文件名
+    file_names = ["sample_text_1.txt", "sample_text_2.txt", "sample_text_3.txt"]
+    
+    # 将示例文本写入文件
+    write_sample_texts_to_file(file_names, sample_texts)
+
+    # 生成摘要
+    all_summaries = summarize_multiple_texts(file_names)
+
+    # 打印每个文件的摘要
+    for file_name, summary in all_summaries.items():
+        print(f"File: {file_name}")
+        print(f"Summary: {summary}\n")
