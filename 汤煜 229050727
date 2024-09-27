@@ -1,0 +1,73 @@
+
+import os
+from openai import OpenAI, AuthenticationError, APIError, PermissionDeniedError, RateLimitError
+
+client = OpenAI(
+    api_key="",  # 提交时删除你的key，避免泄露
+    base_url="https://api.deepseek.com"
+)
+deployment = "deepseek-chat"
+
+def get_summary(text):
+    prompt = f"用三到五句话概括这段内容\n\n{text}"
+    messages = [{"role": "user", "content": prompt}]
+    try:
+        response = client.chat.completions.create(
+            model=deployment,
+            messages=messages,
+            temperature=0.7,
+            max_tokens=150
+        )
+
+    except AuthenticationError:
+        print("身份认证出错")
+        return None
+    except APIError:
+        print("API错误")
+        return None
+    except PermissionDeniedError:
+        print("权限错误")
+        return None
+    except RateLimitError:
+        print("速率限制过快")
+        return None
+    except Exception:
+        print("非法请求错误")
+        return None
+    except FileNotFoundError:
+        print("文件不存在错误")
+        return None
+
+    return response.choices[0].message.content
+
+
+# Test the function
+sample_text = """
+测试内容：
+刘女士今年42岁，她是一位初中老师，平常工作压力很大，经常需要熬夜备课，为了提神只能喝咖啡，最多的时候一天能喝上5杯咖啡。
+
+上周，她在晨起时没站稳摔倒在地，右边身体先着的地，锁骨处传来一阵剧痛。去医院检查竟被诊断为锁骨骨折，且她还患有骨质疏松症。这让刘女士特别诧异，自己不过是摔了一下，怎么会骨折呢？还有骨质疏松，不是老年人才会得的病吗？
+
+了解过往史后，医生认为刘女士患骨质疏松，与她长期大量饮用咖啡相关。咖啡内的咖啡因可导致身体脱钙，再加上刘女士因为工作的缘故饮食也不规律，存在钙摄入不足的问题，在二者的共同作用下，诱发了骨质疏松。
+"""
+summary = get_summary(sample_text)
+print("Summary:", summary)
+
+
+# TODO: 实现一个从文件读取文本的函数
+def read_text_from_file(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return file.read()
+    except FileNotFoundError:
+        print(f"错误：文件 '{file_path}' 不存在。")
+    except IOError:
+        print(f"错误：无法读取文件 '{file_path}'。")
+    return None
+
+
+for l1s in ["./txt1.txt", "./txt2.txt", "./txt3.txt"]:
+    text = read_text_from_file(p)
+    summary = get_summary(text)
+    print(summary)
+
