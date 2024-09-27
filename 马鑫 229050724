@@ -1,0 +1,91 @@
+import os
+from openai import ContentFilterFinishReasonError, OpenAI, AuthenticationError, APIError, PermissionDeniedError, RateLimitError
+
+client = OpenAI(
+    api_key="",  
+    base_url="https://api.deepseek.com"
+)
+deployment = "deepseek-chat"
+
+messages = [
+    {
+        "role": "user",
+        "content": """翻译这段话 
+        1.Implement error handling for API calls
+         Add functionality to summarize multiple texts"""
+    }
+]
+
+response = client.chat.completions.create(
+    model=deployment,
+    messages=messages
+
+)
+
+text = response.choices[0].message.content
+
+print(text)
+
+
+def get_summary(text):
+    prompt = f"概括这段内容\n\n{text}"
+    messages = [{"role": "user", "content": prompt}]
+    response = None
+    try:
+        response = client.chat.completions.create(
+            model=deployment,
+            messages=messages,
+            temperature=0.7,
+            max_tokens=150
+        )
+
+    except ContentFilterFinishReasonError:
+        print("内容过滤过程中发生了错误")
+        return response
+    except APIError:
+        print("API错误")
+        return response
+    except PermissionDeniedError:
+        print("权限错误")
+        return response
+    except AuthenticationError:
+        print("拼写错误")
+        return response
+    except Exception:
+        print("非法请求错误")
+        return response
+
+    return response.choices[0].message.content
+
+
+# Test the function
+sample_text = """
+人工智能与机器学习：AI和ML技术的应用越来越广泛，从自动驾驶到医疗诊断，都需要专业人才。
+
+云计算：随着企业向云端迁移，云计算专家的需求也在增加。
+
+网络安全：随着网络攻击的增加，网络安全专家的需求也在上升。
+
+数据科学：大数据分析和数据科学家的需求持续增长，帮助企业从海量数据中提取有价值的信息。
+"""
+
+summary = get_summary(sample_text)
+print("Summary:", summary)
+
+
+# TODO: 实现一个从文件读取文本的函数
+def read_text_from_file(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return file.read()
+    except FileNotFoundError:
+        print(f"错误：文件 '{file_path}' 不存在。")
+    except IOError:
+        print(f"错误：无法读取文件 '{file_path}'。")
+    return None
+
+
+for p in ["./work1.txt", "./work2.txt", "./work3.txt"]:
+    text = read_text_from_file(p)
+    summary = get_summary(text)
+    print("",summary)
