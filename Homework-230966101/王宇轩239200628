@@ -1,0 +1,76 @@
+
+import os
+from openai import OpenAI
+
+client = OpenAI(
+  api_key="",
+  base_url="https://api.deepseek.com"
+)
+deployment = "deepseek-chat"
+
+def get_summary(text):
+    prompt = f"Summarize the following text in 3-5 sentences:\n\n{text}"
+    messages = [{"role": "user", "content": prompt}]
+    response = client.chat.completions.create(
+        model=deployment,
+        messages=messages,
+        temperature=0.7,
+        max_tokens=150
+    )
+    return response.choices[0].message.content
+
+# Test the function
+sample_text = """
+[Your long text here]
+"""
+
+summary = get_summary(sample_text)
+print("Summary:", summary)
+
+# TODO: Implement a function to read text from a file
+# 实现从文件中读取文本的函数
+def read_text_from_file(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return file.read()
+    except FileNotFoundError:
+        print(f"The file {file_path} was not found.")
+    except IOError:
+        print(f"Could not read file {file_path}.")
+    return ""
+# TODO: Implement error handling for API calls
+# 为 API 调用实施错误处理
+def get_summary(text):
+    prompt = f"Summarize the following text in 3-5 sentences:\n\n{text}"
+    messages = [{"role": "user", "content": prompt}]
+    try:
+        response = client.chat.completions.create(
+            model=deployment,
+            messages=messages,
+            temperature=0.7,
+            max_tokens=150
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        print(f"An error occurred while requesting a summary: {str(e)}")
+        return None
+# TODO: Add functionality to summarize multiple texts
+# 添加汇总多个文本的功能
+def summarize_texts(texts):
+    summaries = []
+    for text in texts:
+        summary = get_summary(text)
+        if summary:
+            summaries.append(summary)
+    return summaries
+
+# 测试函数
+file_paths = ["text1.txt", "text2.txt"]
+texts = [read_text_from_file(fp) for fp in file_paths]
+
+if any(texts):
+    summaries = summarize_texts(texts)
+    for s in summaries:
+        print("Summary:", s)
+else:
+    print("No valid texts were found.")
