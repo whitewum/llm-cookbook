@@ -1,0 +1,125 @@
+
+import os
+from openai import OpenAI
+
+client = OpenAI(
+  api_key=""        
+  base_url="https://api.deepseek.com"
+)
+deployment = "deepseek-chat"
+
+def get_summary(text):
+    prompt = f"Summarize the following text in 3-5 sentences:\n\n{text}"
+    messages = [{"role": "user", "content": prompt}]
+    response = client.chat.completions.create(
+        model=deployment,
+        messages=messages,
+        temperature=0.7,
+        max_tokens=150
+    )
+    return response.choices[0].message.content
+
+# Test the function
+sample_text = """
+[Your long text here]
+"""
+
+summary = get_summary(sample_text)
+print("Summary:", summary)
+
+# TODO: Implement a function to read text from a file
+# 实现从文件中读取文本的函数
+def read_text_from_file(file_path):
+    """
+    从指定文件中读取文本内容。
+
+    :param file_path: 文件路径
+    :return: 文件中的文本内容
+    """
+    with open(file_path, 'r', encoding='utf-8') as file:
+        text = file.read()
+    return text
+
+# TODO: Implement error handling for API calls
+# 为 API 调用实施错误处理
+def get_summary(text):
+    prompt = f"Summarize the following text in 3-5 sentences:\n\n{text}"
+    messages = [{"role": "user", "content": prompt}]
+    try:
+        response = client.chat.completions.create(
+            model=deployment,
+            messages=messages,
+            temperature=0.7,
+            max_tokens=150
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        return f"Error: {e}"
+
+# TODO: Add functionality to summarize multiple texts
+# 添加汇总多个文本的功能
+import os
+from openai import OpenAI
+
+client = OpenAI(
+  api_key="",        
+  base_url="https://api.deepseek.com"
+)
+deployment = "deepseek-chat"
+
+def read_text_from_file(file_path):
+    """
+    从指定文件中读取文本内容。
+
+    :param file_path: 文件路径
+    :return: 文件中的文本内容
+    """
+    with open(file_path, 'r', encoding='utf-8') as file:
+        text = file.read()
+    return text
+
+def get_summary(text):
+    prompt = f"Summarize the following text in 3-5 sentences:\n\n{text}"
+    messages = [{"role": "user", "content": prompt}]
+    try:
+        response = client.chat.completions.create(
+            model=deployment,
+            messages=messages,
+            temperature=0.7,
+            max_tokens=150
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        return f"Error: {e}"
+
+def summarize_multiple_texts(texts):
+    """
+    汇总多个文本。
+
+    :param texts: 包含多个文本的列表
+    :return: 包含每个文本摘要的列表
+    """
+    summaries = []
+    for text in texts:
+        summary = get_summary(text)
+        summaries.append(summary)
+    return summaries
+
+# 测试从文件中读取文本
+file_path = "sample_text.txt"
+sample_text = read_text_from_file(file_path)
+
+# 测试单个文本的摘要
+summary = get_summary(sample_text)
+print("Summary:", summary)
+
+# 测试多个文本的摘要
+texts = [
+    "Text 1: This is the first text to summarize.",
+    "Text 2: This is the second text to summarize.",
+    "Text 3: This is the third text to summarize."
+]
+summaries = summarize_multiple_texts(texts)
+for i, summary in enumerate(summaries):
+    print(f"Summary {i+1}:", summary)
+
