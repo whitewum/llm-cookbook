@@ -1,0 +1,59 @@
+#鲍鼎丞+229050209
+import os
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="your-api-key", # 提交时删除你的key，避免泄露
+    base_url="https://api.deepseek.com"
+)
+deployment = "deepseek-chat"
+
+# 获取单个文本摘要，并进行 API 错误处理
+def get_summary(text):
+    prompt = f"Summarize the following text in 3-5 sentences:\n\n{text}"
+    messages = [{"role": "user", "content": prompt}]
+    
+    try:
+        response = client.chat.completions.create(
+            model=deployment,
+            messages=messages,
+            temperature=0.7,
+            max_tokens=150
+        )
+        return response.choices[0].message.content
+    except openai.error.OpenAIError as e:
+        print(f"API 调用错误: {str(e)}")
+    except Exception as e:
+        print(f"发生了一个未预期的错误: {str(e)}")
+    
+    return "无法生成摘要，请检查错误日志。"
+
+# 从文件读取文本
+def read_text_from_file(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return file.read()
+    except FileNotFoundError:
+        print(f"错误：文件 '{file_path}' 不存在。")
+    except IOError:
+        print(f"错误：无法读取文件 '{file_path}'。")
+    return None
+
+# 处理多个文本并生成摘要
+def summarize_multiple_texts(texts):
+    summaries = []
+    for i, text in enumerate(texts):
+        print(f"正在处理第 {i+1} 个文本...")
+        summary = get_summary(text)
+        summaries.append(summary)
+        print(f"第 {i+1} 个文本摘要: {summary}\n")
+    return summaries
+
+# 示例测试
+texts = [
+    "这是第一个文本。",
+    "这是第二个文本。",
+    "这是第三个文本。"
+]
+
+summaries = summarize_multiple_texts(texts)
